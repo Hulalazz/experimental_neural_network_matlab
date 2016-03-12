@@ -29,7 +29,7 @@ function [ trained_models ] = train_ann( models, datasets )
     
     else
         % Train without parfor, faster for single training, slower for training multiple models.
-        trained_models = train_network( models, datasets );
+        trained_models = { train_network( models, datasets ) };
         p.progress;
     end
     p.stop;

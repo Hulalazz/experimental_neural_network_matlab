@@ -25,7 +25,7 @@ function [ model ] = initialize_model( layer_sizes, varargin )
 
     addOptional( p, 'plot_title',               ''                  );                                                  % Title text used in plots, uses index when unspecified.
     addOptional( p, 'update_method',            'GD',               @(v)any(strcmp(UPDATE_METHOD,v)) );
-    addOptional( p, 'U',                        0,                  @(x)isnumeric(x) );                                 % Used by EG+- update method
+    addOptional( p, 'U',                        40,                 @(x)isnumeric(x) );                                 % Used by EG+- update method
     addOptional( p, 'learning_rate',            0,                  @(x)isnumeric(x) );
     addOptional( p, 'num_epochs',               30,                 @(x)isnumeric(x) );
     addOptional( p, 'mini_batch_size',          100,                @(x)isnumeric(x) );
@@ -104,10 +104,11 @@ function [ model ] = initialize_model( layer_sizes, varargin )
     model.cost_function_cost  = COST_FUNCTIONS_COST(p.Results.cost_function);
     model.cost_function_delta = COST_FUNCTIONS_DELTA(p.Results.cost_function);
     
-    % For EG+-, normalize the weights to U to begin.
+    % Sanity check intput for EG+-, no regularization is used, it's intrisically built into the update method via the U parameter
 	if( strcmp(p.Results.update_method,'EG+-') )
-        
-    end
+        model.regularization = 'none';
+        if( all(~strcmp('regularization', p.UsingDefaults)) ); warning('A regularization method was specified, however update method EG+- does not use this parameter. Regularization is intrinsic via the U parameter for EG+-. The regularization parameter has been nullified.'); end;
+	end
 
 end
 

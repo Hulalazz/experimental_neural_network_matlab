@@ -25,9 +25,8 @@ function [ model ] = update_mini_batch( model, mini_batch_X, mini_batch_y, learn
                 weights_pos_update = rpos .* model.weights.positive{l};
                 weights_neg_update = rneg .* model.weights.negative{l};
                 sum_inputs_to_neuron = sum(weights_pos_update,1) + sum(weights_neg_update,1);
-                EG_reg_term = regularization_term(model.lambda, model.learning_rate, model.weights.positive{l}-model.weights.negative{l}, model.regularization);
-                model.weights.positive{l} = model.U .* bsxfun(@rdivide, weights_pos_update, sum_inputs_to_neuron) - EG_reg_term;
-                model.weights.negative{l} = model.U .* bsxfun(@rdivide, weights_neg_update, sum_inputs_to_neuron) - EG_reg_term;
+                model.weights.positive{l} = model.U .* bsxfun(@rdivide, weights_pos_update, sum_inputs_to_neuron);
+                model.weights.negative{l} = model.U .* bsxfun(@rdivide, weights_neg_update, sum_inputs_to_neuron);
             case 'GD'
                 model.weights{l} = regularized_weights(model.lambda, model.learning_rate, model.weights{l}, model.regularization) - (learning_rate .* delta_w{l});    % Original formulation without regularization:  model.weights{l} = model.weights{l} - (learning_rate .* delta_w{l});
                 model.biases{l}  = model.biases{l}  - (learning_rate .* delta_b{l});
@@ -58,16 +57,16 @@ function [reg_weights] = regularized_weights(lambda, eta, weights, regularizatio
     end
 end
 
-% Returns the regularization term for the various regularization methods and appropriate parameters.
-function [reg_term] = regularization_term(lambda, eta, weights, regularization_method)
-    switch regularization_method
-        case 'L2'
-            reg_term = (eta*lambda) .* weights;
-        case 'L1'
-            reg_term = ( (eta*lambda) .* sign(weights) );
-        case 'none'
-            reg_term = zeros(size(weights));
-        otherwise
-            assert( false, sprintf('Regularization method [%s] not recognized', regularization_method) );
-    end
-end
+% % Returns the regularization term for the various regularization methods and appropriate parameters.
+% function [reg_term] = regularization_term(lambda, eta, weights, regularization_method)
+%     switch regularization_method
+%         case 'L2'
+%             reg_term = (eta*lambda) .* weights;
+%         case 'L1'
+%             reg_term = ( (eta*lambda) .* sign(weights) );
+%         case 'none'
+%             reg_term = zeros(size(weights));
+%         otherwise
+%             assert( false, sprintf('Regularization method [%s] not recognized', regularization_method) );
+%     end
+% end

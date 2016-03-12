@@ -57,8 +57,13 @@ function [ model ] = train_network( model, data )
             if( strcmp(model.verbosity, 'epoch') || strcmp(model.verbosity, 'debug') )
                 fprintf( 'Epoch %j complete\n', j );
             end
-        end
+        end % end Metrics section
         
-    end
+    end % end epoch loop
+    
+    % Convert metrics from cell arrays to standard matricies.
+    model.Metrics.training_cost     = cell2mat( model.Metrics.training_cost );
+    model.Metrics.training_accuracy = cell2mat( model.Metrics.training_accuracy );
+    model.Metrics.cv_accuracy       = cell2mat( model.Metrics.cv_accuracy );
 end
 
