@@ -115,7 +115,7 @@ If metrics generation wasn't disabled in the model the trained model will contai
 ###Known issues
  - `predict_ann` is not currently implemented, for experimental usage it is not necessary if you define a CV set in your data. When you do this your cross validation data will be predicted as part of the metrics generation and everything you need to report results is available and prepared for you.
  - Currently only classification is supported.
- - 
+
 ###Licensing and Contact
 This package is maintained by David Parks, UCSC  --  Contact: dfparks@ucsc.edu
 
