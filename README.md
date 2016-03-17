@@ -88,7 +88,7 @@ Note that figure legends will use the model parameter 'plot_title' from each mod
 
 |Parameters|Value|Default|Description|
 |---------|:---------|-----------|
-|trained_models|Result from `train_ann`|Required|A cell array of trained models, this is the default returned value from `train_ann`|
+|trained_models|Result from 'train_ann'|Required|A cell array of trained models, this is the default returned value from 'train_ann'|
 |'plot_training_accuracy'|true/false|true|Plot the accuracy on the training data as a function of the number of epochs|
 |'plot_cv_accuracy'|true/false|true|Plot the accuracy on the unseen cross validation data as a function of the number of epochs on the same plot|
 |'plot_training_cost'|true/false|true|Plot the training cost generated aggregated by training epoch|
