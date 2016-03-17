@@ -82,7 +82,7 @@ plot_n_runs_accuracy_cost( trained_model );
 
 ###Plotting Results
 Plot functions assume a cell array of 1 or more trained models. Plot functions available:
-`plot_n_run_accuracy_cost( trained_models )` Plots training accuracy, cross validation accuracy, and traing cost for each trained model in the cell array passed to it.
+'plot_n_run_accuracy_cost( trained_models )' Plots training accuracy, cross validation accuracy, and traing cost for each trained model in the cell array passed to it.
 
 Note that figure legends will use the model parameter 'plot_title' from each model.
 
