@@ -56,13 +56,13 @@ plot_n_runs_accuracy_cost( trained_model );
 |'plot_title'|Text|None|The text used in the plot legend (and possibly elsewhere that a model name is needed).|
 |'update_method'|'GD' or 'EG+-'|'GD'|The update method to use, Gradient Descent and EG+- are options (Exponentiated Gradient)|
 |'U'|Numeric|40|The regularization term used by EG+-, unused if EG+- isn't chosen as the update method.|
-|'learning_rate'|Numeric|Dynamic|The 'Eta' learning rate, default value set dynamically depending on the cost function chosen. 3.0 for quadratic cost and 0.5 default for cross entropy.
+|'learning_rate'|Numeric|depends on cost function|The 'Eta' learning rate, default value set dynamically depending on the cost function chosen. 3.0 for quadratic cost and 0.5 default for cross entropy.
 |'num_epochs'|Numeric|30|Number of epochs of the training set to run through. Note that this parameter will change in future versions.|
 |'mini_batch_size'|Numeric|100|Number of samples to compute in each mini batch. 1 equals stochastic, choosing a value equal to the # of epochs is equal to full batch gradient descent.|
 |'cost_function'|'sum_of_squares', 'cross_entropy'|'sum_of_squares'|The cost function to use.|
 |'initial_weights'|Cell array of weights|Auto initialized|The weights are initialized to random values based on the 'weight_init_method'. You can specify them manually.|
 |'initial_biases'|Cell array of biases|Auto initialized|Bias units, works the same as initial_weights|
-|'weight_init_method'|'1/sqrt(n)', 'gaussian-0-mean-1-std'|'`/sqrt(n)'|The method used to initialize the weights and biases. |
+|'weight_init_method'|'1/sqrt(n)', 'gaussian-0-mean-1-std'|'1/sqrt(n)'|The method used to initialize the weights and biases. |
 |'regularization'|'none', 'L1', 'L2'|'L2'|The regularization method to use. Note this is only used by Gradient Descent updates, not EG+-.|
 |'lambda'|Numeric|1.0e-4|Degree of regularization to apply. Note that this is a fixed percent value, some texts, notably NeuralNetworksAndDeepLearning.com suggest to use lambda/n, but this causes an unnecessary dependence on the size of the input dataset.|
 |'monitor_training_cost'|true/false|true|Enables generation of training data accuracy and cost function data Metrics.|
