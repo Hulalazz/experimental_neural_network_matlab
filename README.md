@@ -82,16 +82,14 @@ plot_n_runs_accuracy_cost( trained_model );
 
 ###Plotting Results
 Plot functions assume a cell array of 1 or more trained models. Plot functions available:
-'plot_n_run_accuracy_cost( trained_models )' Plots training accuracy, cross validation accuracy, and traing cost for each trained model in the cell array passed to it.
+`plot_n_run_accuracy_cost( trained_models )` Plots training accuracy, cross validation accuracy, and traing cost for each trained model in the cell array passed to it.
 
 Note that figure legends will use the model parameter 'plot_title' from each model.
 
 |Parameters|Value|Default|Description|
 |---------|:---------|-----------|
-|trained_models|Result from 'train_ann'|Required|A cell array of trained models, this is the default returned value from 'train_ann'|
-|'plot_training_accuracy'|true/false|true|Plot the accuracy on the training data as a function of the number of epochs|
-|'plot_cv_accuracy'|true/false|true|Plot the accuracy on the unseen cross validation data as a function of the number of epochs on the same plot|
-|'plot_training_cost'|true/false|true|Plot the training cost generated aggregated by training epoch|
+|trained_models|Result from `train_ann`|Required|A cell array of trained models, this is the default returned value from `train_ann`|
+
 
 **Example usage:**
 ```matlab
