@@ -92,6 +92,7 @@ Note that figure legends will use the model parameter 'plot_title' from each mod
 |'plot_training_accuracy'|true/false|true|Plot the accuracy on the training data as a function of the number of epochs|
 |'plot_cv_accuracy'|true/false|true|Plot the accuracy on the unseen cross validation data as a function of the number of epochs on the same plot|
 |'plot_training_cost'|true/false|true|Plot the training cost generated aggregated by training epoch|
+
 **Example usage:**
 ```matlab
 % Plot the Training and Cross validation accuracy only.
