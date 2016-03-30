@@ -1,4 +1,4 @@
-function [ model ] = train_network( model, data )
+function [ model ] = train_network( model, data, progress_bar )
 
     num_samples         = size(data.feature_data, 1);
     assert( num_samples < intmax('uint32') );
@@ -8,7 +8,7 @@ function [ model ] = train_network( model, data )
     num_epochs          = model.num_epochs;
     rng_seed            = model.rng_seed;
     
-    rng(rng_seed);      % Seed the random number generator up front
+    rng(rng_seed);      % Seed the random number generator up front, note this was set in the model parameters as 'shuffle' or an integer value
     
     assert( number_mini_batches > 0, ...                        % Sanity check
             sprintf('Number of mini batches is zero with a batch size of %d and number of samples %d\n', batch_size, num_samples ) );
@@ -38,15 +38,18 @@ function [ model ] = train_network( model, data )
         
         % Metrics
         if( model.monitor_accuracy && ~isempty(data.cv_feature_data) )
-            feedforward_features = feedforward(model,data.feature_data);
-            [~, predict_X_train] = max(feedforward_features{end}, [], 2);
-            [~, actual_y_train]  = max(data.labels, [], 2);
-            feedforward_labels   = feedforward(model,data.cv_feature_data);
-            [~, predict_X_cv]    = max(feedforward_labels{end}, [], 2);
-            [~, actual_y_cv]     = max(data.cv_labels, [], 2);
+            %feedforward_features = (model,data.feature_data);
+            %[~, predict_X_train] = max(feedforward_features{end}, [], 2);
+            %[~, actual_y_train]  = max(data.labels, [], 2);
+            %feedforward_labels   = feedforward(model,data.cv_feature_data);
+            %[~, predict_X_cv]    = max(feedforward_labels{end}, [], 2);
+            %[~, actual_y_cv]     = max(data.cv_labels, [], 2);
 
-            training_accuracy    = sum(predict_X_train==actual_y_train)/size(predict_X_train,1);
-            cv_accuracy          = sum(predict_X_cv==actual_y_cv)/size(predict_X_cv,1);
+            %training_accuracy    = sum(predict_X_train==actual_y_train)/size(predict_X_train,1);
+            %cv_accuracy          = sum(predict_X_cv==actual_y_cv)/size(predict_X_cv,1);
+            
+            training_accuracy     = sum( all(predict_ann(model,data.feature_data) == data.labels,2) ) / size(data.labels,1);
+            cv_accuracy           = sum( all(predict_ann(model,data.cv_feature_data) == data.cv_labels,2) ) / size(data.cv_labels,1);
 
             if( strcmp(model.verbosity, 'epoch') || strcmp(model.verbosity, 'debug') )
                 fprintf( 'Epoch %03i, Training Accuracy: %.3f, CV Accuracy: %.3f\n', j, training_accuracy, cv_accuracy );
@@ -59,6 +62,8 @@ function [ model ] = train_network( model, data )
             end
         end % end Metrics section
         
+        if( nargin >= 3 ) progress_bar.progress; end;       % Progress bar update per epoch
+
     end % end epoch loop
     
     % Convert metrics from cell arrays to standard matricies.

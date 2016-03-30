@@ -1,6 +1,7 @@
 function [ model ] = initialize_model( layer_sizes, varargin )
     COST_FUNCTION_OPTIONS =  {'sum_of_squares', ...
-                              'cross_entropy' };
+                              'cross_entropy', ...
+                              'loglikelihood' };
     WEIGHT_INIT_METHODS =    {'1/sqrt(n)', ...
                               'gaussian-0-mean-1-std'};
     VERBOSITY =              {'none', ...           % This should really be handled with an isVerboseEnough function.
@@ -11,9 +12,9 @@ function [ model ] = initialize_model( layer_sizes, varargin )
     REGULARIZATION_OPTIONS = {'none', ...
                               'L1', ...
                               'L2' };
-    LEARNING_RATES      = containers.Map(COST_FUNCTION_OPTIONS, [ 3.0  0.5 ] );  % Default learning rates per cost function
-    COST_FUNCTIONS_COST  = containers.Map(COST_FUNCTION_OPTIONS, { @cost_quadratic,       @cost_cross_entropy       } );
-    COST_FUNCTIONS_DELTA = containers.Map(COST_FUNCTION_OPTIONS, { @cost_quadratic_delta, @cost_cross_entropy_delta } );
+    LEARNING_RATES       = containers.Map(COST_FUNCTION_OPTIONS, [ 3.0, 0.5, 1.0 ] );  % Default learning rates per cost function
+    COST_FUNCTIONS_COST  = containers.Map(COST_FUNCTION_OPTIONS, { @cost_quadratic,       @cost_cross_entropy,       @cost_log_likelihood       } );
+    COST_FUNCTIONS_DELTA = containers.Map(COST_FUNCTION_OPTIONS, { @cost_quadratic_delta, @cost_cross_entropy_delta, @cost_log_likelihood_delta } );
     
     %**************************************************************
     % Input parameters, basic validation, and parameter parsing
@@ -23,24 +24,26 @@ function [ model ] = initialize_model( layer_sizes, varargin )
     
     addRequired( p, 'layer_sizes',      @(x)ismatrix(x) );
 
-    addOptional( p, 'plot_title',               ''                  );                                                  % Title text used in plots, uses index when unspecified.
-    addOptional( p, 'update_method',            'GD',               @(v)any(strcmp(UPDATE_METHOD,v)) );
-    addOptional( p, 'U',                        40,                 @(x)isnumeric(x) );                                 % Used by EG+- update method
-    addOptional( p, 'learning_rate',            0,                  @(x)isnumeric(x) );
-    addOptional( p, 'num_epochs',               30,                 @(x)isnumeric(x) );
-    addOptional( p, 'mini_batch_size',          100,                @(x)isnumeric(x) );
-    addOptional( p, 'cost_function',            'sum_of_squares',   @(v)any(strcmp(COST_FUNCTION_OPTIONS,v)) );
-    addOptional( p, 'initial_weights',          [],                 @(x)ismatrix(x) );
-    addOptional( p, 'initial_biases',           [],                 @(x)ismatrix(x) );
-    addOptional( p, 'weight_init_method',       '1/sqrt(n)',        @(v)any(strcmp(WEIGHT_INIT_METHODS,v)) );
-    addOptional( p, 'weight_bias_data_type',    single([]),         @(x)isempty(x) && isfloat(x) );
-    addOptional( p, 'regularization',           'L2',               @(v)any(strcmp(REGULARIZATION_OPTIONS,v)) );
-    addOptional( p, 'lambda',                   1.0e-4,             @(x)isnumeric(x) );
-    addOptional( p, 'monitor_training_cost',    true,               @(x)islogical(x) );
-    addOptional( p, 'monitor_accuracy',         true,               @(x)islogical(x) );
-    addOptional( p, 'verbosity',                'epoch',            @(v)any(strcmp(VERBOSITY,v)) );
-    addOptional( p, 'rng_seed',                 'shuffle',          @(x)strcmp(x,'shuffle')||isnumeric(x) );            % May be 'shuffle' for random, or a fixed integer >0
-    addOptional( p, 'noise_function',           'none',             @(f)isa(f,'function_handle') || strcmp(f,'none') );
+    addOptional( p, 'plot_title',                       ''                  );                                                  % Title text used in plots, uses index when unspecified.
+    addOptional( p, 'update_method',                    'GD',               @(v)any(strcmp(UPDATE_METHOD,v)) );
+    addOptional( p, 'U',                                40,                 @(x)strcmp(x,'unnormalized')||isnumeric(x) );       % Used by EG+- update method
+    addOptional( p, 'learning_rate',                    0,                  @(x)isnumeric(x) );
+    addOptional( p, 'num_epochs',                       30,                 @(x)isnumeric(x) );
+    addOptional( p, 'mini_batch_size',                  100,                @(x)isnumeric(x) );
+    addOptional( p, 'cost_function',                    'sum_of_squares',   @(v)any(strcmp(COST_FUNCTION_OPTIONS,v)) );
+    addOptional( p, 'initial_weights',                  [],                 @(x)ismatrix(x) );
+    addOptional( p, 'initial_biases',                   [],                 @(x)ismatrix(x) );
+    addOptional( p, 'weight_init_method',               '1/sqrt(n)',        @(v)any(strcmp(WEIGHT_INIT_METHODS,v)) );
+    addOptional( p, 'weight_bias_data_type',            single([]),         @(x)isempty(x) && isfloat(x) );
+    addOptional( p, 'regularization',                   'L2',               @(v)any(strcmp(REGULARIZATION_OPTIONS,v)) );
+    addOptional( p, 'lambda',                           1.0e-4,             @(x)isnumeric(x) );
+    addOptional( p, 'monitor_training_cost',            true,               @(x)islogical(x) );
+    addOptional( p, 'monitor_accuracy',                 true,               @(x)islogical(x) );
+    addOptional( p, 'verbosity',                        'epoch',            @(v)any(strcmp(VERBOSITY,v)) );
+    addOptional( p, 'rng_seed',                         'shuffle',          @(x)strcmp(x,'shuffle')||isnumeric(x) );            % May be 'shuffle' for random, or a fixed integer >0
+    addOptional( p, 'noise_function',                   'none',             @(f)isa(f,'function_handle') || strcmp(f,'none') );
+    addOptional( p, 'use_softmax_output_layer',         false,              @(x)islogical(x) );                                 % Automatically enabled if loglikelihood cost function is used.
+    addOptional( p, 'debug_check_numerical_gradients',  false,              @(x)islogical(x) );                                 % Enables debug checking of numerical gradients on each backprop step, very slow
     
     parse( p, layer_sizes, varargin{:} );
 
@@ -49,31 +52,33 @@ function [ model ] = initialize_model( layer_sizes, varargin )
     % Build model struct with appropriate settings
     %************************************************
     % Required parameters
-    model.layer_sizes = p.Results.layer_sizes;
-    model.num_layers = numel(p.Results.layer_sizes);
+    model.layer_sizes                       = p.Results.layer_sizes;
+    model.num_layers                        = numel(p.Results.layer_sizes);
     
     % Optional parameters
-    model.learning_rate         = p.Results.learning_rate;
-    model.num_epochs            = p.Results.num_epochs;
-    model.mini_batch_size       = p.Results.mini_batch_size;
-    model.cost_function         = p.Results.cost_function;
-    model.regularization        = p.Results.regularization;
-    model.lambda                = p.Results.lambda;
-    model.update_method         = p.Results.update_method;
+    model.learning_rate                     = p.Results.learning_rate;
+    model.num_epochs                        = p.Results.num_epochs;
+    model.mini_batch_size                   = p.Results.mini_batch_size;
+    model.cost_function                     = p.Results.cost_function;
+    model.regularization                    = p.Results.regularization;
+    model.lambda                            = p.Results.lambda;
+    model.update_method                     = p.Results.update_method;
+    model.use_softmax_output_layer          = p.Results.use_softmax_output_layer;
+    model.debug_check_numerical_gradients   = p.Results.debug_check_numerical_gradients;
     
-    model.monitor_training_cost = p.Results.monitor_training_cost;
-    model.monitor_accuracy      = p.Results.monitor_accuracy;
-    model.verbosity             = p.Results.verbosity;
-    model.rng_seed              = p.Results.rng_seed;
-    model.title                 = p.Results.plot_title;
-    model.noise_function        = p.Results.noise_function;
+    model.monitor_training_cost             = p.Results.monitor_training_cost;
+    model.monitor_accuracy                  = p.Results.monitor_accuracy;
+    model.verbosity                         = p.Results.verbosity;
+    model.rng_seed                          = p.Results.rng_seed;
+    model.title                             = p.Results.plot_title;
+    model.noise_function                    = p.Results.noise_function;
     
     % Use random number seed for initializations, rng takes 'shuffle' or the value passed to rng_seed
     rng(p.Results.rng_seed);
     
     % Parameters specific to EG+/- update method
     if( strcmp(p.Results.update_method,'EG+-') )
-        assert( p.Results.U ~= 0, 'U parameter must be present when using EG+- updates, it should be a positive real number' );
+        assert( strcmp(p.Results.U,'unnormalized') || p.Results.U > 0, 'U parameter must be present when using EG+- updates, it should be a positive real number' );
         model.U = p.Results.U;
     end
     
@@ -108,9 +113,15 @@ function [ model ] = initialize_model( layer_sizes, varargin )
 	if( strcmp(p.Results.update_method,'EG+-') )
         model.regularization = 'none';
         if( all(~strcmp('regularization', p.UsingDefaults)) ); warning('A regularization method was specified, however update method EG+- does not use this parameter. Regularization is intrinsic via the U parameter for EG+-. The regularization parameter has been nullified.'); end;
-	end
+    end
 
+    % Log likelihood cost function - when this cost function is used enable softmax output layer
+    if( strcmp(p.Results.cost_function, 'loglikelihood') )
+        model.use_softmax_output_layer = true;
+    end
+    
 end
+
 
 function [ model ] = initialize_weights_and_biases( model, p )
 	layer_sizes = p.Results.layer_sizes;
@@ -127,9 +138,11 @@ function [ model ] = initialize_weights_and_biases( model, p )
             model.biases{l}   = rand( 1, layer_sizes(l+1), 'like', p.Results.weight_bias_data_type );
 
             % Normalize to U
-            sum_inputs_to_neuron = sum(model.weights.positive{l},1) + sum(model.weights.negative{l},1);
-            model.weights.positive{l} = model.U .* bsxfun(@rdivide, model.weights.positive{l}, sum_inputs_to_neuron);
-            model.weights.negative{l} = model.U .* bsxfun(@rdivide, model.weights.negative{l}, sum_inputs_to_neuron);
+            if( ~strcmp(p.Results.U,'unnormalized') )
+                sum_inputs_to_neuron = sum(model.weights.positive{l},1) + sum(model.weights.negative{l},1);
+                model.weights.positive{l} = model.U .* bsxfun(@rdivide, model.weights.positive{l}, sum_inputs_to_neuron);
+                model.weights.negative{l} = model.U .* bsxfun(@rdivide, model.weights.negative{l}, sum_inputs_to_neuron);
+            end
         end
         
     elseif( strcmp(p.Results.weight_init_method, '1/sqrt(n)') )

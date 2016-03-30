@@ -10,7 +10,7 @@ function [ grad_w, grad_b, optional_cost ] = backprop( model, X, y )
 
     % Backward pass
     % output layer
-    delta = model.cost_function_delta( z{end}, activations{end}, y );
+    delta = model.cost_function_delta( z{end}, activations{end}, y );   % in the output layer the sigmoid is coded by cost_function_delta
     grad_b{end} = mean( delta, 1 );
     grad_w{end} = (activations{end-1}' * delta) ./ m;
 
@@ -21,17 +21,16 @@ function [ grad_w, grad_b, optional_cost ] = backprop( model, X, y )
             case 'GD';   weights_Lplus1 = model.weights{l+1};
             otherwise;   assert(false,'Update method not recognized');
         end
-        %delta = ( delta * model.weights{l+1}' ) .* sigmoid_prime(z{l+1});
-        delta = ( delta * weights_Lplus1' ) .* sigmoid_prime(z{l+1});
+        delta = ( delta * weights_Lplus1' ) .* sigmoid_prime(z{l+1});       % Sigmoid transfer function is hard coded here
         grad_b{l} = mean( delta, 1 );
         grad_w{l} = activations{l}' * delta ./ m;
     end
 
-%TODO: 
-    % Generate the sum of squares cost function output if it was requested
+    % Generate the cost function output if it was requested
     if( nargout == 3 )
-        %optional_cost = sum(sum( (1/2) * ((y - activations{end}) .^ 2) ) );
         optional_cost = model.cost_function_cost( activations{end}, y );
     end
+    
+
 end
 

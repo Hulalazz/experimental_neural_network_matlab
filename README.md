@@ -3,8 +3,8 @@
 This library is a general purpose Artificial Neural Network implementation in MATLAB focused on research purposes. It is designed to have a large number of often experimental features that can easily be enabled/disabled without bogging the user down in details they aren't immediately concerned with.
 
 Last Update: **11 Mar 16**
-Version: **0.1.0** alpha release (stable, but not thoroughly tested)
-*Requirements:* Matlab parallel processing toolkit
+Version: **0.1.1** alpha release (stable, but not thoroughly tested)
+*Requirements:* Matlab parallel processing toolkit, tested on R2015b
 *Optional:* Matlab computer vision toolkit (some optional functions)
 
 ###Basic Usage:
@@ -54,8 +54,8 @@ plot_n_runs_accuracy_cost( trained_model );
 |----------|:-----|-------|:-----------|
 |layer_sizes|[784&nbsp;30&nbsp;30&nbsp;10]|Required|Defines the network size, the example shown in the Value column creates a network of 784 inputs, two hidden layers of 30 neurons, and 10 output neurons.|
 |'plot_title'|Text|None|The text used in the plot legend (and possibly elsewhere that a model name is needed).|
-|'update_method'|'GD' or 'EG+-'|'GD'|The update method to use, Gradient Descent and EG+- are options (Exponentiated Gradient)|
-|'U'|Numeric|40|The regularization term used by EG+-, unused if EG+- isn't chosen as the update method.|
+|'update_method'|'GD' or 'EG+-'|'GD'|The update method to use, Gradient Descent and EG+- are options (Exponentiated Gradient [2])|
+|'U'|Numeric or 'unnormalized'|40|The regularization term used by EG+-, unused if EG+- isn't chosen as the update method. For unnormalized EG+- use 'unnormalized' instead of a numeric value. [2]|
 |'learning_rate'|Numeric|depends on cost function|The 'Eta' learning rate, default value set dynamically depending on the cost function chosen. 3.0 for quadratic cost and 0.5 default for cross entropy.
 |'num_epochs'|Numeric|30|Number of epochs of the training set to run through. Note that this parameter will change in future versions.|
 |'mini_batch_size'|Numeric|100|Number of samples to compute in each mini batch. 1 equals stochastic, choosing a value equal to the # of epochs is equal to full batch gradient descent.|
@@ -88,7 +88,7 @@ Note that figure legends will use the model parameter 'plot_title' from each mod
 
 |Parameters|Value|Default|Description|
 |----------|:-----|-------|:-----------|
-|trained_models|Result from `train_ann`|Required|A cell array of trained models, this is the default returned value from `train_ann`|
+|trained_models|Result from `train_ann`|Required|A cell array of trained models, this is the standard returned value from `train_ann`|
 |'plot_training_accuracy'|true/false|true|Plot the accuracy on the training data as a function of the number of epochs|
 |'plot_cv_accuracy'|true/false|true|Plot the accuracy on the unseen cross validation data as a function of the number of epochs on the same plot|
 |'plot_training_cost'|true/false|true|Plot the training cost generated aggregated by training epoch|
@@ -100,7 +100,7 @@ plot_n_run_accuracy_cost( trained_models, 'plot_cost_function', false );
 ```
 
 ###Metrics
-If metrics generation wasn't disabled in the model the trained model will contain a new struct called `Metrics`. It will contain the following metrics:
+If metrics generation wasn't disabled in the model the trained model will contain a new struct called `Metrics`. It will contain the following data:
  - `training_cost` per-mini batch cost function results
  - `training_accuracy` per-epoch accuracy on the training data
  - `cv_accuracy` per-epoch accuracy on the optional cross validation data
@@ -142,6 +142,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-
-
+###References
+[1] Michael Nielsen, "Neural Networks and Deep Learning book", [online] www.neuralnetworksanddeeplearning.com
+[2] Manfred Warmuth and Jyrki Kivinen, "Exponentiated Gradient versus Gradient Descent for Linear Predictors" (1997), [online] https://users.soe.ucsc.edu/~manfred/pubs/J36.pdf
 
