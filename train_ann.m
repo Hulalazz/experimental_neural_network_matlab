@@ -1,17 +1,24 @@
 function [ trained_models ] = train_ann( models, datasets )
     %TRAIN_ANN Train one or more models on one or more datasets, results will be either one trained model or a cell array of trained models
-
+    
     assert( numel(models) == 1 || numel(datasets) == 1, 'Training supports multiple models on one data set, or one data set for multiple models, but not both' );
-    useParallelTraining = ( numel(models) > 1 || numel(datasets) > 1 );
     num_iterations = numel(models)*numel(datasets);
     trained_models = cell(num_iterations,1);
-    total_epochs = count_total_epochs(models, datasets);
-    
+    total_steps = count_total_steps(models, datasets);
+
+	% Determines if we run in parallel or sequential mode, and in a few cases the optimal number of workers is tweaked for quick runs to process better.
+    useParallelTraining = ( numel(models) > 1 || numel(datasets) > 1 );
+    if    (num_iterations == 2); num_workers = 0;
+    elseif(num_iterations == 7); num_workers = 7;
+    elseif(num_iterations == 8); num_workers = 8;
+    elseif(num_iterations == 9); num_workers = 5;
+    else                         num_workers = 6;
+    end;
+
 	tic;
-    %p = ProgressBar( numel(models)*numel(datasets) );      %Per model progress bar
     if( useParallelTraining )
-        p = ProgressBar( total_epochs );
-        parfor n = 1:num_iterations
+        p = ProgressBar( total_steps );
+        parfor ( n = 1:num_iterations, num_workers )
             % Use either the single dataset or pick the next one from the cell array of inputs.
             if(numel(datasets) == 1); DATA = datasets;    
             else                      DATA = cell2mat(datasets(n)); end;
@@ -39,7 +46,7 @@ function [ trained_models ] = train_ann( models, datasets )
 
 end
 
-function [ total_epochs ] = count_total_epochs( models, datasets )
+function [ total_epochs ] = count_total_steps( models, datasets )
     total_epochs = 0;
     if( iscell(models) )
         for i = 1:numel(models)                                     % Count epochs in each model
