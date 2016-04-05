@@ -4,7 +4,7 @@ function [ model ] = train_network( model, data, progress_bar )
     assert( num_samples < intmax('uint32') );
     batch_size          = model.mini_batch_size;
     number_mini_batches = floor( num_samples / batch_size );    % Take the floor and combine the final batch into a larger than normal batch to account for leftover samples that don't make a full batch
-    learning_rate       = model.learning_rate;
+    model.Scratch.number_mini_batches = number_mini_batches;
     num_epochs          = model.num_epochs;
     rng_seed            = model.rng_seed;
     
@@ -17,7 +17,7 @@ function [ model ] = train_network( model, data, progress_bar )
 
     for j = 1:num_epochs
         samples_shuffle = cast( randperm(num_samples), 'uint32' );
-    
+        
         for i = 1:number_mini_batches
             fromix = (i-1)*batch_size + 1;
             if( i == number_mini_batches ); toix = num_samples;
@@ -33,21 +33,20 @@ function [ model ] = train_network( model, data, progress_bar )
             end
             
             % Run one batch update
-            model = update_mini_batch( model, feature_data, label_data, learning_rate  );
+            model = update_mini_batch( model, feature_data, label_data  );
+            
+            % Generic callback functions: model.callback_post_update
+            % This abstract structure is used to implement different options that need to insert code after the mini batch update process
+            for callback = model.callbacks_post_update
+                [ model ] = callback{1}( model, feature_data, label_data );
+            end
+            
+            % Increment batch counter
+            model.Scratch.batch_num = model.Scratch.batch_num + 1;
         end
         
         % Metrics
         if( model.monitor_accuracy && ~isempty(data.cv_feature_data) )
-            %feedforward_features = (model,data.feature_data);
-            %[~, predict_X_train] = max(feedforward_features{end}, [], 2);
-            %[~, actual_y_train]  = max(data.labels, [], 2);
-            %feedforward_labels   = feedforward(model,data.cv_feature_data);
-            %[~, predict_X_cv]    = max(feedforward_labels{end}, [], 2);
-            %[~, actual_y_cv]     = max(data.cv_labels, [], 2);
-
-            %training_accuracy    = sum(predict_X_train==actual_y_train)/size(predict_X_train,1);
-            %cv_accuracy          = sum(predict_X_cv==actual_y_cv)/size(predict_X_cv,1);
-            
             training_accuracy     = sum( all(predict_ann(model,data.feature_data) == data.labels,2) ) / size(data.labels,1);
             cv_accuracy           = sum( all(predict_ann(model,data.cv_feature_data) == data.cv_labels,2) ) / size(data.cv_labels,1);
 

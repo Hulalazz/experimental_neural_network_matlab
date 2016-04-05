@@ -12,6 +12,8 @@ function [ model ] = initialize_model( layer_sizes, varargin )
     REGULARIZATION_OPTIONS = {'none', ...
                               'L1', ...
                               'L2' };
+	EG_SHARING_OPTIONS =     {'none', ...
+                              'past_average' };
     LEARNING_RATES       = containers.Map(COST_FUNCTION_OPTIONS, [ 3.0, 0.5, 1.0 ] );  % Default learning rates per cost function
     COST_FUNCTIONS_COST  = containers.Map(COST_FUNCTION_OPTIONS, { @cost_quadratic,       @cost_cross_entropy,       @cost_log_likelihood       } );
     COST_FUNCTIONS_DELTA = containers.Map(COST_FUNCTION_OPTIONS, { @cost_quadratic_delta, @cost_cross_entropy_delta, @cost_log_likelihood_delta } );
@@ -27,6 +29,9 @@ function [ model ] = initialize_model( layer_sizes, varargin )
     addOptional( p, 'plot_title',                       ''                  );                                                  % Title text used in plots, uses index when unspecified.
     addOptional( p, 'update_method',                    'GD',               @(v)any(strcmp(UPDATE_METHOD,v)) );
     addOptional( p, 'U',                                40,                 @(x)strcmp(x,'unnormalized')||isnumeric(x) );       % Used by EG+- update method
+	addOptional( p, 'EG_sharing',                       'none',             @(v)any(strcmp(EG_SHARING_OPTIONS,v)) );            % Past weight sharing for EG updates
+    addOptional( p, 'EG_sharing_alpha',                 0.1,                @(x)isnumeric(x) );                                 % Used by EG+- when sharing is enabled
+    addOptional( p, 'EG_sharing_past_avg_agg_batches',  intmax,             @(x)isnumeric(x) );                                 % Used by EG+- with past_average sharing for aggregating past history
     addOptional( p, 'learning_rate',                    0,                  @(x)isnumeric(x) );
     addOptional( p, 'num_epochs',                       30,                 @(x)isnumeric(x) );
     addOptional( p, 'mini_batch_size',                  100,                @(x)isnumeric(x) );
@@ -72,6 +77,8 @@ function [ model ] = initialize_model( layer_sizes, varargin )
     model.rng_seed                          = p.Results.rng_seed;
     model.title                             = p.Results.plot_title;
     model.noise_function                    = p.Results.noise_function;
+    model.callbacks_post_update             = {};                                               % Callback functions post mini batch update
+    model.Scratch.batch_num                 = 1;                                                % The batch iteration number, incremented after each minibatch update
     
     % Use random number seed for initializations, rng takes 'shuffle' or the value passed to rng_seed
     rng(p.Results.rng_seed);
@@ -80,6 +87,14 @@ function [ model ] = initialize_model( layer_sizes, varargin )
     if( strcmp(p.Results.update_method,'EG+-') )
         assert( strcmp(p.Results.U,'unnormalized') || p.Results.U > 0, 'U parameter must be present when using EG+- updates, it should be a positive real number' );
         model.U = p.Results.U;
+        model.EG_sharing                        = p.Results.EG_sharing;
+        model.EG_sharing_alpha                  = p.Results.EG_sharing_alpha;
+        model.EG_sharing_past_avg_agg_batches   = p.Results.EG_sharing_past_avg_agg_batches;
+        model.EG_sharing_past_weights_biases    = [];
+        % Set callback for sharing (change this to a switch if more sharing options are added beyond past_average
+        if( strcmp(p.Results.EG_sharing, 'past_average') )
+            model.callbacks_post_update{end+1} = @(model, feature_data, label_data) eg_sharing_past_average(model);
+        end
     end
     
     % Initialize the Metrics struct where metric data is stored if the model calls for it.

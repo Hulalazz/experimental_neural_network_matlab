@@ -56,6 +56,9 @@ plot_n_runs_accuracy_cost( trained_model );
 |'plot_title'|Text|None|The text used in the plot legend (and possibly elsewhere that a model name is needed).|
 |'update_method'|'GD' or 'EG+-'|'GD'|The update method to use, Gradient Descent and EG+- are options (Exponentiated Gradient [2])|
 |'U'|Numeric or 'unnormalized'|40|The regularization term used by EG+-, unused if EG+- isn't chosen as the update method. For unnormalized EG+- use 'unnormalized' instead of a numeric value. [2]|
+|'EG_sharing'|'none' or 'past_average'|'none'|Sharing method implemented by EG+/- update algorithm|
+|'EG_sharing_alpha'|Numeric|0.1|Alpha parameter for EG_sharing, the percentage of weight removed from the past update and shared among previous updates|
+|'EG_sharing_past_avg_agg_batches'|Numeric|2147483647 (intmax)|When EG_sharing is set to past_average this indicates how many weight updates to aggregate together. Setting this to 1 will store all past weight updates (and may generate massive amounts of data on all but small datasets)|
 |'learning_rate'|Numeric|depends on cost function|The 'Eta' learning rate, default value set dynamically depending on the cost function chosen. 3.0 for quadratic cost and 0.5 default for cross entropy.
 |'num_epochs'|Numeric|30|Number of epochs of the training set to run through. Note that this parameter will change in future versions.|
 |'mini_batch_size'|Numeric|100|Number of samples to compute in each mini batch. 1 equals stochastic, choosing a value equal to the # of epochs is equal to full batch gradient descent.|
@@ -79,6 +82,13 @@ plot_n_runs_accuracy_cost( trained_model );
 |'cv_features'|MxD matrix|N/A|A matrix of feature data to use as an unseen cross validation dataset (not necessarily the same size as the feature data). Same format as feature_data.|
 |'cv_labels'|MxC matrix|N/A|If cv_features was specified this is required, same format as labels|
 |'rescale_method'|'none', 'standardize', 'rescale'|'none'|The method used to normalize the input features. Note that if you do not normalize the input features but have a high variance in the inputs you will receive a warning.|
+
+###train_ann
+This function is generally used without parameters, but a few runtime parameters are available for certain special cases.
+|Parameters|Value|Default|Description|
+|----------|:-----|-------|:-----------|
+|workers|Integer|CPU Cores + 1|Specifies the number of parallel pool workers that will be used. Defaults to one more than the number of cpu cores. Cannot use more workers than are created by the parallel pool.|
+|save|'path/filename'|N/A|Exports training results to disk instead of returning them from the function. This will export each training as it completes and remove it from memory. `train_ann` will return empty results instead of trained models.|
 
 ###Plotting Results
 Plot functions assume a cell array of 1 or more trained models. Plot functions available:
@@ -114,7 +124,6 @@ If metrics generation wasn't disabled in the model the trained model will contai
  - Regression
 
 ###Known issues
- - `predict_ann` is not currently implemented, for experimental usage it is not necessary if you define a CV set in your data. When you do this your cross validation data will be predicted as part of the metrics generation and everything you need to report results is available and prepared for you.
  - Currently only classification is supported.
 
 ###Licensing and Contact

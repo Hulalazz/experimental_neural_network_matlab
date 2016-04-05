@@ -47,7 +47,7 @@ function [ model ] = perturb( model, index, epsilon )
 
 end
 
-
+% TODO swap out with global functions flatten_weights_biases & unflatten_weights_biases
 function [ flattened_params ] = flatten_gradient_parameters( sz, grad_w, grad_b )
     flattened_params = zeros(sz,1);
     pos = 1;

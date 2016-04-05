@@ -1,4 +1,4 @@
-function [ model ] = update_mini_batch( model, mini_batch_X, mini_batch_y, learning_rate )
+function [ model ] = update_mini_batch( model, mini_batch_X, mini_batch_y )
     m = size(mini_batch_X,1);
 
     % delta_w, and delta_b are the gradient for weights and biases w.r.t. the cost function
@@ -29,11 +29,11 @@ function [ model ] = update_mini_batch( model, mini_batch_X, mini_batch_y, learn
                     model.weights.negative{l} = model.U .* bsxfun(@rdivide, weights_neg_update, sum_inputs_to_neuron);
                 end
             case 'GD'
-                model.weights{l} = regularized_weights(model.lambda, model.learning_rate, model.weights{l}, model.regularization) - (learning_rate .* delta_w{l});    % Original formulation without regularization:  model.weights{l} = model.weights{l} - (learning_rate .* delta_w{l});
+                model.weights{l} = regularized_weights(model.lambda, model.learning_rate, model.weights{l}, model.regularization) - (model.learning_rate .* delta_w{l});    % Original formulation without regularization:  model.weights{l} = model.weights{l} - (learning_rate .* delta_w{l});
             otherwise
                 assert( false, 'Update method not recognized.' );
         end
-        model.biases{l}  = model.biases{l}  - (learning_rate .* delta_b{l});
+        model.biases{l}  = model.biases{l}  - (model.learning_rate .* delta_b{l});
     end
 
 end
