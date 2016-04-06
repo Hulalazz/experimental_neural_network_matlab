@@ -5,6 +5,6 @@ function [ cost ] = cost_cross_entropy( a, y )
     cost = -y .* log(a) - (1-y) .* log(1-a);
     cost(isnan(cost)) = 0;                      % Convert nan to 0 for casees such as when a and y are both 1, this should be 0 (1-y=0 in this case)
     cost(isinf(cost)) = flintmax(class(a));     % Convert infinity to appropriate max float
-    cost = sum(cost(:));
+    cost = sum(cost(:))  / size(a,1);
 end
 

@@ -5,7 +5,8 @@ function [ num_grad_w, num_grad_b ] = numericalGradients( model, X, y )
     num_grad_b = cell(model.num_layers-1,1);
     h = 1e-4;
     
-    C = @(model,X,y) (1/2)*sum(sum((y-feedforward(model,X)).^2));
+    a = feedforward(model,X);
+    C = @(model,X,y) (1/2)*sum(sum((y-a{end}).^2));
     
     for l = 1:model.num_layers-1
         num_grad_w{l} = zeros(size(model.weights{l}));

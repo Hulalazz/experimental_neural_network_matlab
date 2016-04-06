@@ -1,4 +1,4 @@
-function [ weights_biases_flat ] = flatten_weights_biases( model )
+function [ weights_biases_flat ] = flatten_weights_biases( model, varargin )
     %FLATTEN_WEIGHTS_BIASES Flattens the weights and biases into a single column vector
     
     array_size = num_network_parameters( model );

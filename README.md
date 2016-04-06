@@ -154,4 +154,5 @@ SOFTWARE.
 ###References
 [1] Michael Nielsen, "Neural Networks and Deep Learning book", [online] www.neuralnetworksanddeeplearning.com
 [2] Manfred Warmuth and Jyrki Kivinen, "Exponentiated Gradient versus Gradient Descent for Linear Predictors" (1997), [online] https://users.soe.ucsc.edu/~manfred/pubs/J36.pdf
+[3] Andrew Ng, Jiquan Ngiam, Chuan Yu Foo, Yifan Mai, Caroline Suen, "Stanford UFLDL Tutorial on Machine Learning", [online] http://ufldl.stanford.edu/wiki/index.php/UFLDL_Tutorial
 

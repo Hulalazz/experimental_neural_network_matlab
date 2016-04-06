@@ -82,7 +82,7 @@ classdef test_ANN < matlab.unittest.TestCase
         
         function test_backprop(testCase)
             % Basic 2 features hand computed ANN, 1 sample
-            model = initialize_model( [2 2 1], {[3 1 ; 2 4], [1 ; -2]}, {[1 ; 2], 3} );
+            model = initialize_model( [2 2 1], 'initial_weights', {[3 1 ; 2 4], [1 ; -2]}, 'initial_biases', {[1 , 2], 3} );
             [grad_w, grad_b] = backprop( model, [2 3], 0 );
             assertTrue( testCase, test_ANN.compareFloat( grad_b{2}, 9.247814e-02, 1.0e-7 ) );
             assertTrue( testCase, test_ANN.compareFloat( grad_w{2}, [9.247793e-02 ;  9.247813e-02], 1.0e-7 ) );

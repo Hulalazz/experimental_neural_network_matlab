@@ -7,7 +7,7 @@ function [ model ] = update_mini_batch( model, mini_batch_X, mini_batch_y )
     
     % Check numerical gradients if debug option for doing so is enabled
     % TODO bug concern: need to move the averaging over minibatch inside the cost function right??!!??
-    if( model.debug_check_numerical_gradients );  assert( check_numerical_gradients(model, delta_w, delta_b, mini_batch_X, mini_batch_y), 'Numerical gradient check failed.' );  end
+    if( model.debug_check_numerical_gradients );  check_numerical_gradients(model, delta_w, delta_b, mini_batch_X, mini_batch_y);  end
 
     % Metrics - save the training cost in the Metrics data
     if(model.monitor_training_cost); model.Metrics.training_cost{end+1} = cost/m; end;

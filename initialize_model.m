@@ -112,7 +112,7 @@ function [ model ] = initialize_model( layer_sizes, varargin )
         assert( ~isempty(p.Results.initial_biases), 'If initial weights are provided with the ''initial_weights'' options, then initial biases must also be provided with ''initial_biases''' );
         assert( strcmp(class(p.Results.initial_weights), class(p.Results.initial_biases)), 'Pre-initialized weights and biases classes don''t match.' );
         model.weights = p.Results.initial_weights;
-        model.biases = p.Results.initial_weights;
+        model.biases = p.Results.initial_biases;
     end
     
     if( ~strcmp(p.Results.regularization,'none') && p.Results.lambda==0 ); warning('Regularization has been configured, but labmda is set to 0, effectively nullifying regularization'); end;

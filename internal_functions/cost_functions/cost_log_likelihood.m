@@ -3,6 +3,6 @@ function [ cost ] = cost_log_likelihood( a, y )
     
     assert( all(all(y==1|y==0)) );   % Note that this cost function works well for binary output encoding, it requires that labels be {1,0}
     
-    cost = -log( sum(sum(y.*a)) );
+    cost = -log( sum(sum(y.*a)) ) / size(a,1);
 end
 
