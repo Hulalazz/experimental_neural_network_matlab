@@ -1,5 +1,5 @@
 function [ data ] = initialize_data( feature_data, labels, varargin )
-    %INITIALIZE_DATA Options: rescaling_method = {'none','standardize','rescale'}
+    %INITIALIZE_DATA feature_data, labels, Options: rescaling_method = {'none','standardize','rescale'}
     
     FEATURE_SCALING_METHODS = {'none', ...
                                'standardize', ...

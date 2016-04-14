@@ -62,7 +62,7 @@ plot_n_runs_accuracy_cost( trained_model );
 |'learning_rate'|Numeric|depends on cost function|The 'Eta' learning rate, default value set dynamically depending on the cost function chosen. 3.0 for quadratic cost and 0.5 default for cross entropy.
 |'num_epochs'|Numeric|30|Number of epochs of the training set to run through. Note that this parameter will change in future versions.|
 |'mini_batch_size'|Numeric|100|Number of samples to compute in each mini batch. 1 equals stochastic, choosing a value equal to the # of epochs is equal to full batch gradient descent.|
-|'cost_function'|'sum_of_squares', 'cross_entropy'|'sum_of_squares'|The cost function to use.|
+|'cost_function'|'sum_of_squares', 'cross_entropy', 'loglikelihood'|'sum_of_squares'|The cost function to use.|
 |'initial_weights'|Cell array of weights|Auto initialized|The weights are initialized to random values based on the 'weight_init_method'. You can specify them manually.|
 |'initial_biases'|Cell array of biases|Auto initialized|Bias units, works the same as initial_weights|
 |'weight_init_method'|'1/sqrt(n)', 'gaussian-0-mean-1-std'|'1/sqrt(n)'|The method used to initialize the weights and biases. |
@@ -73,6 +73,7 @@ plot_n_runs_accuracy_cost( trained_model );
 |'verbosity'|'none', 'epoch', 'debug'|'epoch'|The amount of console output to write during single training runs.|
 |'rng_seed'|Numeric, 'shuffle'|'shuffle'|A random seed to generate deterministic results.|
 |'noise_function'|@function_handle, 'none'|'none'|A function that will take feature input and transform it. The noise function must take an MxD matrix of features and return a transformed MxD matrix of features. It will be called on each epoch to transform the data before processing.|
+|'debug_check_numerical_gradients'|true/false|false|Runs a numerical gradient check at each mini batch. This is really only for debugging purposes, for example, when adding a new cost function. If verbose='debug', per-weight/bias output will be written to the console. Also note that inputs should be double precision. Numerical gradient checks must be within 1e-9 to pass. An exception will be thrown if the gradient check fails.|
 
 ###initialize_data parameter options
 |Parameters|Value|Default|Description|

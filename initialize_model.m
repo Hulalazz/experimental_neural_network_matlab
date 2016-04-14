@@ -49,6 +49,7 @@ function [ model ] = initialize_model( layer_sizes, varargin )
     addOptional( p, 'noise_function',                   'none',             @(f)isa(f,'function_handle') || strcmp(f,'none') );
     addOptional( p, 'use_softmax_output_layer',         false,              @(x)islogical(x) );                                 % Automatically enabled if loglikelihood cost function is used.
     addOptional( p, 'debug_check_numerical_gradients',  false,              @(x)islogical(x) );                                 % Enables debug checking of numerical gradients on each backprop step, very slow
+%    addOptional( p, 'jl_k_layer_sizes',                 [],                 @(x)ismatrix(x) );                                  % Defines JL projections per layer and enables JL projection processing
     
     parse( p, layer_sizes, varargin{:} );
 

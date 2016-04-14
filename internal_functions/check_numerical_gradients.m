@@ -24,12 +24,13 @@ function check_numerical_gradients( model, grad_w, grad_b, X, y )
             cost2 = model.cost_function_cost( a{end}, y );
             numerical_gradient = (double(cost1) - double(cost2)) / (2*epsilon);
             backprop_gradient  = grad_b{l}(j);
-            %assert( abs(numerical_gradient - backprop_gradient) < MAXDIFF, 'Numerical gradient check failed' );
+            if(strcmp(model.verbosity,'debug')); fprintf( '\nbias backprop: [%+.12f], numerical: [%+.12f], diff: [%+.12f]\n', backprop_gradient, numerical_gradient, abs(numerical_gradient - backprop_gradient) ); end;
+            assert( abs(numerical_gradient - backprop_gradient) < MAXDIFF, 'Numerical gradient check failed' );
             model.biases{l}(j) = orig_bias;
             
             % Weights
             for k = 1:model.layer_sizes(l)                          % Loop over each input to each node
-                jk = j*k+k;                                         % Index of edge j,k (edge from node j back to node k from the previous layer)
+                jk = (j-1)*model.layer_sizes(l)+k;                                         % Index of edge j,k (edge from node j back to node k from the previous layer)
                 switch model.update_method
                     case 'EG+-'
                         orig_weight = model.weights.positive{l}(jk);                    % Perturb the weight and calculate the cost
@@ -53,8 +54,8 @@ function check_numerical_gradients( model, grad_w, grad_b, X, y )
                 end
                 numerical_gradient = (double(cost1) - double(cost2)) / (2*epsilon);             % Compare numerical gradient to the one obtained from backprop
                 backprop_gradient  = grad_w{l}(jk);
-                fprintf( 'backprop: [%f], numerical: [%f], diff: [%f]', backprop_gradient, numerical_gradient, abs(numerical_gradient - backprop_gradient) );
-                %assert( abs(numerical_gradient - backprop_gradient) < MAXDIFF, 'Numerical gradient check failed' ); 
+                if(strcmp(model.verbosity,'debug')); fprintf( 'weight backprop: [%+.12f], numerical: [%+.12f], diff: [%+.12f]\n', backprop_gradient, numerical_gradient, abs(numerical_gradient - backprop_gradient) ); end;
+                assert( abs(numerical_gradient - backprop_gradient) < MAXDIFF, 'Numerical gradient check failed' ); 
             end %for k (edge)
         end %for j (node)
     end %for l (layer)
@@ -113,16 +114,16 @@ end
 % end
 
 
-function [ flattened_params ] = flatten_gradient_parameters( sz, grad_w, grad_b )
-    flattened_params = zeros(sz,1);
-    pos = 1;
-    for i = 1:numel(grad_w)
-        flattened_params(pos:pos+numel(grad_w{i})-1) = grad_w{i}(:);
-        pos = pos + numel(grad_w{i});
-    end
-    for i = 1:numel(grad_b)
-        flattened_params(pos:pos+numel(grad_b{i})-1) = grad_b{i}(:);
-        pos = pos + numel(grad_b{i});
-    end
-        
-end
+% function [ flattened_params ] = flatten_gradient_parameters( sz, grad_w, grad_b )
+%     flattened_params = zeros(sz,1);
+%     pos = 1;
+%     for i = 1:numel(grad_w)
+%         flattened_params(pos:pos+numel(grad_w{i})-1) = grad_w{i}(:);
+%         pos = pos + numel(grad_w{i});
+%     end
+%     for i = 1:numel(grad_b)
+%         flattened_params(pos:pos+numel(grad_b{i})-1) = grad_b{i}(:);
+%         pos = pos + numel(grad_b{i});
+%     end
+%         
+% end

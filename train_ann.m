@@ -4,7 +4,7 @@ function [ trained_models ] = train_ann( models, datasets, varargin )
 	ip = inputParser;
     addRequired( ip, 'models' );
     addRequired( ip, 'datasets' );
-    addOptional( ip, 'workers',      feature('numCores')+1,      @(x)isnumeric(x) );     % Max worker threads to use in parallel processing, default to # of cores + 1
+    addOptional( ip, 'workers',      feature('numCores')+2,      @(x)isnumeric(x) );     % Max worker threads to use in parallel processing, default to # of cores + 2
     addOptional( ip, 'save',         'none',                     @(x)ischar(x) );        % Exports results to disk as they complete instead of as a return value.
     parse( ip, models, datasets, varargin{:} );
     
