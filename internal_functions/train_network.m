@@ -35,11 +35,11 @@ function [ model ] = train_network( model, data, progress_bar )
             % Run one batch update
             model = update_mini_batch( model, feature_data, label_data  );
             
-            % Generic callback functions: model.callback_post_update
-            % This abstract structure is used to implement different options that need to insert code after the mini batch update process
-            for callback = model.callbacks_post_update
-                [ model ] = callback{1}( model, feature_data, label_data );
-            end
+%             % Generic callback functions: model.callback_post_update
+%             % This abstract structure is used to implement different options that need to insert code after the mini batch update process
+%             for callback = model.callbacks_post_update
+%                 [ model ] = callback{1}( model, feature_data, label_data );
+%             end
             
             % Increment batch counter
             model.Scratch.batch_num = model.Scratch.batch_num + 1;
@@ -57,7 +57,7 @@ function [ model ] = train_network( model, data, progress_bar )
             model.Metrics.cv_accuracy{end+1}        = cv_accuracy;
         else
             if( strcmp(model.verbosity, 'epoch') || strcmp(model.verbosity, 'debug') )
-                fprintf( 'Epoch %j complete\n', j );
+                fprintf( 'Epoch %03i complete\n', j );
             end
         end % end Metrics section
         
@@ -66,8 +66,10 @@ function [ model ] = train_network( model, data, progress_bar )
     end % end epoch loop
     
     % Convert metrics from cell arrays to standard matricies.
-    model.Metrics.training_cost     = cell2mat( model.Metrics.training_cost );
-    model.Metrics.training_accuracy = cell2mat( model.Metrics.training_accuracy );
-    model.Metrics.cv_accuracy       = cell2mat( model.Metrics.cv_accuracy );
+    if( model.monitor_training_cost );      model.Metrics.training_cost         = cell2mat( model.Metrics.training_cost       ); end
+    if( model.monitor_accuracy );           model.Metrics.training_accuracy     = cell2mat( model.Metrics.training_accuracy   ); end
+    if( model.monitor_accuracy );           model.Metrics.cv_accuracy           = cell2mat( model.Metrics.cv_accuracy         ); end
+    if( model.store_weight_history);        model.Metrics.weight_bias_history   = cell2mat( model.Metrics.weight_bias_history ); end
+    if( model.monitor_delta_norm);          model.Metrics.delta_norm            = cell2mat( model.Metrics.delta_norm          ); end
 end
 

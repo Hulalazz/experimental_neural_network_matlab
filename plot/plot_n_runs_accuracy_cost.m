@@ -12,6 +12,7 @@ function [fig] = plot_n_runs_accuracy_cost( cell_array_of_traied_models, varargi
     addOptional( p, 'plot_cv_accuracy',         true,               @(x)islogical(x) );
     addOptional( p, 'plot_training_cost',       true,               @(x)islogical(x) );
     addOptional( p, 'hold_on',                  false,              @(x)isa(x,'matlab.ui.Figure') );        % give a graphics context (using gcf for example) to plot into
+    addOptional( p, 'plot_legend',              true,               @(x)islogical(x) );
     
     parse( p, cell_array_of_traied_models, varargin{:} );    
     models_to_plot         = p.Results.models_to_plot;
@@ -39,8 +40,11 @@ function [fig] = plot_n_runs_accuracy_cost( cell_array_of_traied_models, varargi
             label(line, m.title, 'location', 'right');
         end
     end
-    h_legend = legend(legend_text, 'Location','southwest');
-    set(h_legend,'FontSize',14);
+    
+    if( p.Results.plot_legend )
+        h_legend = legend(legend_text, 'Location','southwest', 'Interpreter', 'none');
+        set(h_legend,'FontSize',14);
+    end
     xlabel('Epochs of training set');
     ylabel('Accuracy');
     hold off;

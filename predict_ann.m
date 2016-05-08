@@ -1,8 +1,7 @@
 function [ predictions ] = predict_ann( trained_model, feature_data )
 %PREDICT_ANN Summary of this function goes here
-%   This function incomplete as of now. Note that it is not necessary if you define a cross validation set in your data, in this case predictions will be made and data available in the trained_model.Metrics struct that do everything necessary.
 
-    [a, ~] = feedforward( trained_model, feature_data );
+    [a, ~] = feedforward( trained_model, feature_data, 'predicting' );
     output_layer = a{end};
     
     if( size(output_layer,2) > 1 )

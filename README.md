@@ -56,13 +56,14 @@ plot_n_runs_accuracy_cost( trained_model );
 |'plot_title'|Text|None|The text used in the plot legend (and possibly elsewhere that a model name is needed).|
 |'update_method'|'GD' or 'EG+-'|'GD'|The update method to use, Gradient Descent and EG+- are options (Exponentiated Gradient [2])|
 |'U'|Numeric or 'unnormalized'|40|The regularization term used by EG+-, unused if EG+- isn't chosen as the update method. For unnormalized EG+- use 'unnormalized' instead of a numeric value. [2]|
-|'EG_sharing'|'none' or 'past_average'|'none'|Sharing method implemented by EG+/- update algorithm|
+|'EG_sharing'|'none', 'past_average', 'decaying_past'|'none'|Sharing method implemented by EG+/- update algorithm. When decaying_past is used be sure to include a parameter 'EG_sharing_decay_q' used to define how the decay rate is calculated.|
 |'EG_sharing_alpha'|Numeric|0.1|Alpha parameter for EG_sharing, the percentage of weight removed from the past update and shared among previous updates|
-|'EG_sharing_past_avg_agg_batches'|Numeric|2147483647 (intmax)|When EG_sharing is set to past_average this indicates how many weight updates to aggregate together. Setting this to 1 will store all past weight updates (and may generate massive amounts of data on all but small datasets)|
+|'EG_sharing_decay_q'|Numeric|0.2|Used with sharing with decaying_past, determines the rate at which decayed sharing is applied. See: https://users.soe.ucsc.edu/~manfred/pubs/J52talk.pdf|
+|'EG_sharing_inc_biases'|true/false|false|Determines if sharing will share past biases or not (e.g. only past weights are shared).|
 |'learning_rate'|Numeric|depends on cost function|The 'Eta' learning rate, default value set dynamically depending on the cost function chosen. 3.0 for quadratic cost and 0.5 default for cross entropy.
 |'num_epochs'|Numeric|30|Number of epochs of the training set to run through. Note that this parameter will change in future versions.|
 |'mini_batch_size'|Numeric|100|Number of samples to compute in each mini batch. 1 equals stochastic, choosing a value equal to the # of epochs is equal to full batch gradient descent.|
-|'cost_function'|'sum_of_squares', 'cross_entropy', 'loglikelihood'|'sum_of_squares'|The cost function to use.|
+|'cost_function'|'sum_of_squares', 'cross_entropy', 'loglikelihood'|'cross_entropy'|The cost function to use.|
 |'initial_weights'|Cell array of weights|Auto initialized|The weights are initialized to random values based on the 'weight_init_method'. You can specify them manually.|
 |'initial_biases'|Cell array of biases|Auto initialized|Bias units, works the same as initial_weights|
 |'weight_init_method'|'1/sqrt(n)', 'gaussian-0-mean-1-std'|'1/sqrt(n)'|The method used to initialize the weights and biases. |
@@ -70,6 +71,8 @@ plot_n_runs_accuracy_cost( trained_model );
 |'lambda'|Numeric|1.0e-4|Degree of regularization to apply. Note that this is a fixed percent value, some texts, notably NeuralNetworksAndDeepLearning.com suggest to use lambda/n, but this causes an unnecessary dependence on the size of the input dataset.|
 |'monitor_training_cost'|true/false|true|Enables generation of training data accuracy and cost function data Metrics.|
 |'monitor_accuracy'|true/false|true|Enables generation of cross validation accuracy metrics per epoch of training.|
+|'jl_projection'|array|[]|Defines the size that each layer will be projected down to using Johnson–Lindenstrauss projections. -1 defines no projection at that layer. Example: [-1 200 100 -1] would be a 4 layer network with projections leaving layer 2 (down to 200) and leaving layer 3 (down to 100), no projections on the input layer or output layer (there is no reason to ever project on the output layer).|
+|'store_weight_history'|true/false|false|Stores a flattened list of all weights & biases for each minibatch in model.Metrics.weight_history. Warning, this can be a huge amount of data. Each column of the matrix contains all weights/biases from the full network. A column can be converted back into matrix form using the utility function: unflatten_weights_biases(trained_model, trained_model.Metrics.weight_history(:,i)) where i is the desired mini-batch iteration.|
 |'verbosity'|'none', 'epoch', 'debug'|'epoch'|The amount of console output to write during single training runs.|
 |'rng_seed'|Numeric, 'shuffle'|'shuffle'|A random seed to generate deterministic results.|
 |'noise_function'|@function_handle, 'none'|'none'|A function that will take feature input and transform it. The noise function must take an MxD matrix of features and return a transformed MxD matrix of features. It will be called on each epoch to transform the data before processing.|
@@ -120,7 +123,6 @@ If metrics generation wasn't disabled in the model the trained model will contai
  - Built in auto encoder
  - Callback capabilities to manipulate the mechanics of the network each mini batch
  - Also will be used for dynamically generating plots and interactively altering parameters such as regularization during network training for real-time analysis during training.
- - Dropout regularization
  - Support for running on the GPU (implemented but untested/nonfunctional)
  - Regression
 
